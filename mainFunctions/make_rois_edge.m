@@ -166,18 +166,19 @@ set(handles.roi_image,'ButtonDownFcn',{@ImageClickCallback,handles});
 
 
 function figScroll(src,evnt,handles)
-    if evnt.VerticalScrollCount==1
-        if handles.frameSlider.Value<size(handles.imageMeanData{1,handles.channel_popup.Value},3)
-            handles.frameSlider.Value=handles.frameSlider.Value+1;
-        end
-    else
-        if handles.frameSlider.Value>1
-            handles.frameSlider.Value=handles.frameSlider.Value-1;
-        end
-    end
-    frameSlider_Callback(src,1,handles);
+%     if evnt.VerticalScrollCount==1
+%         if handles.frameSlider.Value<size(handles.imageMeanData{1,handles.channel_popup.Value},3)
+%             handles.frameSlider.Value=handles.frameSlider.Value+1;
+%         end
+%     else
+%         if handles.frameSlider.Value>1
+%             handles.frameSlider.Value=handles.frameSlider.Value-1;
+%         end
+%     end
+%     frameSlider_Callback(src,1,handles);
+% set(handles.roi_image,'ButtonDownFcn',{@ImageClickCallback,handles});
+% guidata(hObject, handles);
 
-% end
 
 function setcallbacks(src,evnt)
     handles = guidata(src);
