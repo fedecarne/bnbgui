@@ -57,7 +57,8 @@ while done == 0
                 r_consolidated = 0;
                 return
         end
-        system(['scp fcarneva@bnbdev1.cshl.edu:~/' code_folder '/' fileout '.mat ' results_folder '/' fileout '.mat']);
+%        system(['scp fcarneva@bnbdev1.cshl.edu:~/' code_folder '/' fileout '.mat ' results_folder '/' fileout '.mat']);
+        scp_simple_get(hostName,userName,password,[code_folder '/' fileout '.mat '],results_folder);
         
         r = load([results_folder '/' fileout '.mat']);
         r = cell2mat(r.results);

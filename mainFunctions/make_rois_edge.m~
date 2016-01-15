@@ -269,8 +269,6 @@ function add_roi_Callback(hObject, eventdata, handles)
         handles.roi_num.String=str2double(handles.roi_num.String)+1;
         roi_num=str2double(handles.roi_num.String);
 
-        handles.roi_label(roi_num) = 1;
-        
         winSize=cell2mat(textscan(handles.smallWinSize.String,'%f'));
         winInd{1}=handles.coor(1)-round(winSize(1)/2)+1:handles.coor(1)+round(winSize(1)/2);
         winInd{2}=handles.coor(2)-round(winSize(2)/2)+1:handles.coor(2)+round(winSize(2)/2);
@@ -290,9 +288,7 @@ function add_roi_Callback(hObject, eventdata, handles)
 
         handles.roiList.String=[1:roi_num]';
         handles.roiList.Value=roi_num;
-
-        set(handles.roi_image,'ButtonDownFcn',{@ImageClickCallback,handles});
-
+        
         guidata(hObject, handles);
     end
 

@@ -173,3 +173,6 @@ end
 results=r_channel;
 
 save([bnbsystem.results_folder '/' im_pre 'reg'],'results');
+if exist('reg_results.mat', 'file')==2
+  delete('reg_results.mat');
+end
