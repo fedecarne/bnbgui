@@ -13,20 +13,19 @@ To do:
 - add handling of ssh connecting errors
 
 to compile in bnb
-mcc -m bnb_register.m -a ./si_functions
-mcc -m bnb_extract.m -a ./si_functions
+mcc -m si_register.m -a ./si_functions
+mcc -m bnb_extractROI.m -a ./si_functions
 
 
 Opentiff problem:
 
 There was an update in the format of the imaging data from SI and a consequent update of the function opentif, so now some datasets correspond to the old and other to the new version. 
-
-I changed functions bnb_register and bnb_extrac to manage both datasets by trying first as new and if it doesn't work then trying the old function (this is in function myOpenTif). This should be working, but is not very elegant. 
+I changed functions si_regster and bnb_extracROI to manage both datasets by trying first as new and if it doesn't work then trying the old function. this should be working, but is not very elegant. Specially because I also used try/catch to manage empty channels, so now it's a bit of a mess.
 
 Functions:
 
 Regstration: 
-	input: tiff files, channel to register against, reference image
+	input: tiff files
 	output: registration file (prefix_reg.mat)
 
 There are two methods: 
@@ -37,6 +36,7 @@ There are two methods:
 Extraction:
 	input: roi data, registration data, tif files
 	output: fluorescence traces
+
 
 Z stacks:
 

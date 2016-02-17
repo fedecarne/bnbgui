@@ -50,13 +50,13 @@ while done == 0
         ssh2_conn = ssh2_close(ssh2_conn);
         
         % Ready to retrieve results from BnB?
-        choice = questdlg('Ready to retrieve results from BnB?', 'Yes', 'No');
-        % Handle response
-        switch choice
-            case 'No'
-                r_consolidated = 0;
-                return
-        end
+%         choice = questdlg('Ready to retrieve results from BnB?', 'Yes', 'No');
+%         % Handle response
+%         switch choice
+%             case 'No'
+%                 r_consolidated = 0;
+%                 return
+%         end
 %        system(['scp fcarneva@bnbdev1.cshl.edu:~/' code_folder '/' fileout '.mat ' results_folder '/' fileout '.mat']);
         scp_simple_get(hostName,userName,password,[code_folder '/' fileout '.mat '],results_folder);
         
@@ -74,6 +74,7 @@ while done == 0
         
     else
         disp(msg);
+        pause(5);
         if ~continuous_inspection
             done=1;
         end

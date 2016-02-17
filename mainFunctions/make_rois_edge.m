@@ -22,7 +22,7 @@ function varargout = make_rois_edge(varargin)
 
 % Edit the above text to modify the response to help make_rois_edge
 
-% Last Modified by GUIDE v2.5 15-Jan-2016 08:28:15
+% Last Modified by GUIDE v2.5 15-Jan-2016 19:35:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -56,6 +56,9 @@ function make_rois_edge_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 if numel(varargin{1})>0
+
+    handles.nowChannelData = 1;
+    handles.nowChannelzStack = 1;
     
     handles.imageMeanData=varargin{1}.frameMeanMaster;
     handles.imageVarData=varargin{1}.frameVarMaster;
@@ -65,13 +68,13 @@ if numel(varargin{1})>0
     
     switch handles.image_popup.Value
         case 1
-            handles.baseimage = handles.imageMeanData{1,handles.channel_popup.Value}(:,:,1);
+            handles.baseimage = handles.imageMeanData{1,handles.nowChannelData}(:,:,1);
         case 2
-            handles.baseimage = handles.imageVarData{1,handles.channel_popup.Value};
+            handles.baseimage = handles.imageVarData{1,handles.nowChannelData}(:,:,1);
         case 3
-            handles.baseimage = handles.imageCorrData{1,handles.channel_popup.Value}(:,:,1);
+            handles.baseimage = handles.imageCorrData{1,handles.nowChannelData}(:,:,1);
     end
-
+    
     handles.DisplayData = 1;
     handles.nowFrameData=1;
     
@@ -176,9 +179,8 @@ function figScroll(src,evnt,handles)
 %         end
 %     end
 %     frameSlider_Callback(src,1,handles);
-% set(handles.roi_image,'ButtonDownFcn',{@ImageClickCallback,handles});
-% guidata(hObject, handles);
 
+% end
 
 function setcallbacks(src,evnt)
     handles = guidata(src);
@@ -806,11 +808,23 @@ axes(handles.bigAxes);
 
 switch handles.image_popup.Value
     case 1
-        handles.baseimage=handles.imageMeanData{1,handles.channel_popup.Value}(:,:,handles.nowFrameData);
+        if handles.DisplayData==1
+            handles.baseimage=handles.imageMeanData{1,handles.nowChannelData}(:,:,handles.nowFrameData);
+        elseif handles.DisplayzStack==1
+            handles.baseimage=handles.imageMeanzStack{1,handles.nowChannelzStack}(:,:,handles.nowFramezStack);
+        end
     case 2
-        handles.baseimage=handles.imageVarData{1,handles.channel_popup.Value};
+        if handles.DisplayData==1
+            handles.baseimage=handles.imageVarData{1,handles.nowChannelData(:,:,1)};
+        elseif handles.DisplayzStack==1
+            handles.baseimage=handles.imageVarzStack{1,handles.nowChannelzStack};
+        end
     case 3
-        handles.baseimage=handles.imageCorrData{1,handles.channel_popup.Value}(:,:,handles.nowFrameData);
+        if handles.DisplayData==1
+           handles.baseimage=handles.imageCorrData{1,handles.nowChannelData}(:,:,handles.nowFrameData);
+        elseif handles.DisplayzStack==1
+            handles.baseimage=handles.imageCorrzStack{1,handles.nowChannelzStack}(:,:,handles.nowFramezStack);
+        end
 end
 
 handles.baseimageRGB = handles.baseimage*handles.contrast_slider.Value+handles.bright_slider.Value;
@@ -904,6 +918,11 @@ function channel_popup_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 axes(handles.bigAxes);
+if handles.DisplayData==1
+    handles.nowChannelData = handles.channel_popup.Value;
+elseif handles.DisplayzStack==1
+    handles.nowChannelzStack = handles.channel_popup.Value;
+end
 drawFrame(hObject, handles);
 
 
@@ -970,6 +989,7 @@ function data_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.DisplayData=1;
 handles.DisplayzStack=0;
+handles.channel_popup.Value = handles.nowChannelData;
 guidata(hObject, handles);
 drawFrame(hObject, handles);
 
@@ -982,6 +1002,7 @@ function zstack_btn_Callback(hObject, eventdata, handles)
 
 handles.DisplayData=0;
 handles.DisplayzStack=1;
+handles.channel_popup.Value = handles.nowChannelzStack;
 
 if ~isfield(handles,'imageMeanzStack')
     [FileName,PathName,FilterIndex] = uigetfile('*.mat','Select zstack file', [pwd '/reg_zstack.mat']);
@@ -994,7 +1015,7 @@ if ~isfield(handles,'imageMeanzStack')
     handles.imageVarzStack = frameMaster.frameVarMaster;
     handles.imageCorrzStack = frameMaster.frameCorrMaster;
     
-    handles.nFrameszStack = size(handles.imageMeanzStack{1,handles.channel_popup.Value},3);
+    handles.nFrameszStack = size(handles.imageMeanzStack{1,handles.nowChannelzStack},3);
     handles.nowFramezStack = 1;
 end
 drawFrame(hObject, handles);
@@ -1004,46 +1025,49 @@ function drawFrame(hObject,handles)
         
 switch handles.image_popup.Value
     case 1
-        if ~isempty(handles.imageMeanData{1,handles.channel_popup.Value})
-            handles.baseimage=handles.imageMeanData{1,handles.channel_popup.Value}(:,:,handles.nowFrameData);
-        else
-            handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
-            handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
-            handles.ref_image.CData=handles.baseimageRGB;
-        end
-        if handles.DisplayzStack==1
-            if handles.nowFramezStack<=handles.nFrameszStack
-                handles.baseimage=handles.imageMeanzStack{1,handles.channel_popup.Value}(:,:,handles.nowFramezStack);
+        if handles.DisplayData==1
+            if ~isempty(handles.imageMeanData{1,handles.nowChannelData})
+                handles.baseimage=handles.imageMeanData{1,handles.nowChannelData}(:,:,handles.nowFrameData);
             else
-                handles.baseimage=handles.imageMeanzStack{1,handles.channel_popup.Value}(:,:,end);
+                handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
+                handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
+                handles.ref_image.CData=handles.baseimageRGB;
+            end
+        elseif handles.DisplayzStack==1
+            if handles.nowFramezStack<=handles.nFrameszStack
+                handles.baseimage=handles.imageMeanzStack{1,handles.nowChannelzStack}(:,:,handles.nowFramezStack);
+            else
+                handles.baseimage=handles.imageMeanzStack{1,handles.nowChannelzStack}(:,:,end);
             end
         end
     case 2
-        if ~isempty(handles.imageVarData{1,handles.channel_popup.Value})
-            handles.baseimage=handles.imageVarData{1,handles.channel_popup.Value};
-        else
-            handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
-            handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
-            handles.ref_image.CData=handles.baseimageRGB;
-        end
-        if handles.DisplayzStack==1
+        if handles.DisplayData==1
+            if ~isempty(handles.imageVarData{1,handles.nowChannelData})
+                handles.baseimage=handles.imageVarData{1,handles.nowChannelData}(:,:,1);
+            else 
+                handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
+                handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
+                handles.ref_image.CData=handles.baseimageRGB;
+            end
+        elseif handles.DisplayzStack==1
             if handles.nowFramezStack<=handles.nFrameszStack
-                handles.baseimage=handles.imageVarzStack{1,handles.channel_popup.Value}(:,:,1);
+                handles.baseimage=handles.imageVarzStack{1,handles.nowChannelzStack}(:,:,1);
             end
         end
     case 3
-        if ~isempty(handles.imageCorrData{1,handles.channel_popup.Value})
-            handles.baseimage=handles.imageCorrData{1,handles.channel_popup.Value}(:,:,handles.nowFrameData);
-        else
-            handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
-            handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
-            handles.ref_image.CData=handles.baseimageRGB;
-        end
-        if handles.DisplayzStack==1
-            if handles.nowFrameData<=handles.nFrameszStack
-                handles.baseimage=handles.imageCorrzStack{1,handles.channel_popup.Value}(:,:,handles.nowFramezStack);
+        if handles.DisplayData==1
+            if ~isempty(handles.imageCorrData{1,handles.nowChannelData})
+                handles.baseimage=handles.imageCorrData{1,handles.nowChannelData}(:,:,handles.nowFrameData);
             else
-                handles.baseimage=handles.imageCorrzStack{1,handles.channel_popup.Value}(:,:,end);
+                handles.baseimage = 0.95*ones(size(handles.baseimage,1),size(handles.baseimage,2));
+                handles.baseimageRGB = repmat(handles.baseimage,[1,1,3]);
+                handles.ref_image.CData=handles.baseimageRGB;
+            end
+        elseif handles.DisplayzStack==1
+            if handles.nowFrameData<=handles.nFrameszStack
+                handles.baseimage=handles.imageCorrzStack{1,handles.nowChannelzStack}(:,:,handles.nowFramezStack);
+            else
+                handles.baseimage=handles.imageCorrzStack{1,handles.nowChannelzStack}(:,:,end);
             end
         end
 end
@@ -1051,8 +1075,7 @@ end
 if handles.DisplayData==1
     handles.frameSliderIndicator.String = handles.nowFrameData;
     handles.frameSlider.Value =  handles.nowFrameData;
-end
-if handles.DisplayzStack==1
+elseif handles.DisplayzStack==1
     handles.frameSliderIndicator.String=handles.nowFramezStack;
     handles.frameSlider.Value =  handles.nowFramezStack;
 end
@@ -1132,3 +1155,19 @@ handles.low_image.CData(BW,1)=0;
 handles.low_image.CData(BW,2)=0;
 handles.low_image.CData(BW,3)=0;
 guidata(hObject,handles);
+
+
+% --- Executes on key press with focus on data_btn and none of its controls.
+function data_btn_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to data_btn (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+     switch eventdata.Key
+         case 'l'
+          zstack_btn_Callback(hObject, eventdata, handles)   
+         case 'k'
+         data_btn_Callback(hObject, eventdata, handles)
+     end

@@ -11,6 +11,7 @@ ssh2_conn = ssh2_config(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bn
 [selection,ok] = listdlg('ListString',folders,'SelectionMode','single','Name','Select data folder');
 
 if ~ok
+    traces=[];
     return
 end
 datain_folder = ['data/' folders{selection,1}];
@@ -18,15 +19,21 @@ datain_folder = ['data/' folders{selection,1}];
 dataout_folder = 'data_out'; % folder to put temporary results
 memory = '16'; % required memory for each job (Gb)
 
-%% (2) ask for file names
-prompt = {'Image prefix:','Image sufix:'};
-dlg_title = 'Enter image files';
-num_lines = 1;
-def = {'t1_','.tif'};
-answer = inputdlg(prompt,dlg_title,num_lines,def);
+[~,msg] = ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && cd ' datain_folder ' && ls ']);
 
-im_pre = answer{1,1};
-im_post = answer{2,1};
+for i=1:size(msg,1)
+    msg{i,1} = msg{i,1}(1:end-7); 
+end
+
+unique_pre = uniqueRowsCA(msg);
+
+[selection,ok] = listdlg('ListString',unique_pre,'SelectionMode','single','Name','Select a prefix');
+if ~ok
+    return
+end
+
+im_pre = unique_pre{selection,1};
+im_post = '.tif';
 
 % Get number of images
 [~,msg] = ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && cd ' datain_folder ' && ls ' im_pre '*' im_post]);
@@ -93,8 +100,11 @@ end
     shortJob = '';
 %end
 
-fTemplate = fopen('bnb_extractROI_template.sh');
-fOutput = fopen('bnb_extractROI.sh', 'w+');
+%fTemplate = fopen('bnb_extractROI_template.sh');
+%fOutput = fopen('bnb_extractROI.sh', 'w+');
+
+fTemplate = fopen('bnb_extract_template.sh');
+fOutput = fopen('bnb_extract.sh', 'w+');
 
 tline = fgetl(fTemplate);
 while ischar(tline)
@@ -113,13 +123,12 @@ fclose(fOutput);
 
 disp( 'Uploading extractROI to blacknblue');
 
-%channel  =  sshfrommatlab(sshdata.userName,sshdata.hostName,sshdata.password);
-%sshfrommatlabissue(channel,['cd ' bnbsystem.code_folder '&& rm -f bnb_extractROI.sh']);
-ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extractROI.sh']);
+%ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extractROI.sh']);
+ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extract.sh']);
 
 % Send .sh to submit
-%sftpfrommatlab(sshdata.userName,sshdata.hostName,sshdata.password,'bnb_extractROI.sh',[code_folder '/bnb_extractROI.sh']);
-ssh2_conn = scp_simple_put(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bnbsystem.sshdata.password,'bnb_extractROI.sh', bnbsystem.code_folder);
+%ssh2_conn = scp_simple_put(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bnbsystem.sshdata.password,'bnb_extractROI.sh', bnbsystem.code_folder);
+ssh2_conn = scp_simple_put(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bnbsystem.sshdata.password,'bnb_extract.sh', bnbsystem.code_folder);
 
 
 %[~, msg]  =  sshfrommatlabissue(channel,['cd ' bnbsystem.code_folder ' && if test -d roi; then echo "1"; fi']);
@@ -140,14 +149,15 @@ if  ~isempty(msg{1,1})
 end
 
 % Submit job array
-[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && mkdir roi && qsub ' shortJob 'bnb_extractROI.sh']);
+%[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && mkdir roi && qsub ' shortJob 'bnb_extractROI.sh']);
+[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && mkdir roi && qsub ' shortJob 'bnb_extract.sh']);
 disp(msg)
 
 %something went wrong here
-[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extractROI.sh*']);
+%[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extractROI.sh*']);
+[~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_extract.sh*']);
 
 % Close connection to BnB
 ssh2_close(ssh2_conn);
 
 traces = consolidate(bnbsystem.sshdata, bnbsystem.code_folder, 'roi', bnbsystem.results_folder, 'traces',1);
-

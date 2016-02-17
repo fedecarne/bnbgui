@@ -1,7 +1,7 @@
 #!/bin/bash
 # specify BASH shell
 #$ -S /bin/bash
-#$ -t 1-"88"
+#$ -t 1-"3"
 # pass environment variables to job, e.g. LD_LIBRARY_PATH
 #$ -v LD_LIBRARY_PATH
 # run job in the current working directory where qsub is executed from
@@ -12,5 +12,5 @@
 # run commands and application
 pwd
 date
-./run_si_register.sh /opt/hpc/pkg/MATLAB/R2013a "data/160108_fm080" "t1_" ".tif" "1" "data/160108_fm080/reg_med.tif" "data_out/out$SGE_TASK_ID" $SGE_TASK_ID
+./run_bnb_register.sh /opt/hpc/pkg/MATLAB/R2013a "data/test" "t2_00" ".tif" "1" "data/test/reg_med.tif" "data_out/out$SGE_TASK_ID" $SGE_TASK_ID
 date

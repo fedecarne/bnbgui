@@ -1,8 +1,17 @@
 function bnbgui
 
+% This is the main bnb user interface. From this GUI we can call the
+% registration, manual roi drawing, extraction, and ideally any other
+% processing of the data.
+
+
 close all
 clear
 clc
+
+current_folder = pwd;
+addpath(genpath(current_folder));
+
 
 global bnbsystem
 
@@ -130,12 +139,14 @@ end
 function extract_Callback(source,callbackdata)
     bnbsystem.traces = bnbTP_extract;
     
-    channel = 1;
-    traces_chan = cell2mat(bnbsystem.traces(:,channel));
-    F  = [traces_chan.roisTrace];
-    t  = [traces_chan(:).frameTimeStamps];
-    figure
-    plot(t,F')
+    if ~isempty(bnbsystem.traces)
+        channel = 1;
+        traces_chan = cell2mat(bnbsystem.traces(:,channel));
+        F  = [traces_chan.roisTrace];
+        t  = [traces_chan(:).frameTimeStamps];
+        figure
+        plot(t,F')
+    end
 % 
 % imagesc(F(:,1:20000))
 % 

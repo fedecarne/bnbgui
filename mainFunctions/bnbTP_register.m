@@ -17,7 +17,6 @@ global bnbsystem
 ssh2_conn = ssh2_config(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bnbsystem.sshdata.password);
 
 %% (1) ask for data folder
-%[~,folders] = sshfrommatlabissue(channel,['cd ' code_folder ' && cd data && ls']);
 [~,folders] = ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && cd data && ls']);
 
 [selection,ok] = listdlg('ListString',folders,'SelectionMode','single','Name','Select data folder');
@@ -74,14 +73,15 @@ if ~isempty(msg{1,1})
 end
 
 
-%% (4) select registratio method
+%% (4) select registration method
 [choice,ok] = listdlg('PromptString','Select registration method:','SelectionMode','single','ListString',{'ReferenceImage','Recursive'});
 
 if ~ok, disp('Registration cancelled.');return, end;
    
 switch choice
     case 1
-        reg_method = 'run_si_register';
+        %reg_method = 'run_si_register';
+        reg_method = 'run_bnb_register';
                 
         prompt = {'Reference image file:'};
         dlg_title = 'Enter image files';
@@ -118,7 +118,8 @@ while ischar(tline)
     tline = strrep( tline, '<<<dataout>>>', ['"' dataout_folder '/out$SGE_TASK_ID"']);
     tline = strrep( tline, '<<<memory>>>', ['"' memory '"']);
     
-    if strcmp(reg_method,'run_si_register')
+    %if strcmp(reg_method,'run_si_register')
+    if strcmp(reg_method,'run_bnb_register')
         tline = strrep( tline, '<<<ref_image>>>', ['"' datain_folder '/' ref_image '"']);
     end
     
@@ -145,6 +146,7 @@ ssh2_conn = scp_simple_put(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName
 [~, msg]  =  ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && mkdir ' dataout_folder ' && qsub ' shortJob ' bnb_register.sh']);
 disp(msg)
 
+% Delete .o and .e files
 ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder '&& rm -f bnb_register.sh*']);
 
 % Close connection to BnB
@@ -171,9 +173,8 @@ for chan=1:4 % channels
     end
 end
 results=r_channel;
-
+disp('Done!')
 save([bnbsystem.results_folder '/' im_pre 'reg'],'results');
-if exist([bnbsystem.results_folder '/reg_results.mat'], 'file')==2
-  delete([bnbsystem.results_folder '/reg_results.mat']);
+if exist('reg_results.mat', 'file')==2
+  delete('reg_results.mat');
 end
-disp('Finished registering.')
