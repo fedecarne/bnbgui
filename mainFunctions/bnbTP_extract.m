@@ -161,3 +161,5 @@ disp(msg)
 ssh2_close(ssh2_conn);
 
 traces = consolidate(bnbsystem.sshdata, bnbsystem.code_folder, 'roi', bnbsystem.results_folder, 'traces',1);
+
+disp('Done!')

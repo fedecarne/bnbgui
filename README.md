@@ -3,7 +3,6 @@ GUI for bnbTP
 
 To do:
 - consolidating...
-- rename functions in cluster with consistent names
 - select channels to register
 - default values for filenames
 - check data folder when asking for a reference image
