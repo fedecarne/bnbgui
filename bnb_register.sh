@@ -12,5 +12,5 @@
 # run commands and application
 pwd
 date
-./run_bnb_register.sh /opt/hpc/pkg/MATLAB/R2013a "data/test" "t2_00" ".tif" "1" "data/test/reg_med.tif" "data_out/out$SGE_TASK_ID" $SGE_TASK_ID
+./run_bnb_register.sh /opt/hpc/pkg/MATLAB/R2013a "../../../../hpc_norepl/data/lad" "t1_" ".tif" "1" "../../../../hpc_norepl/data/lad/reg_med.tif" "data_out/out$SGE_TASK_ID" $SGE_TASK_ID
 date

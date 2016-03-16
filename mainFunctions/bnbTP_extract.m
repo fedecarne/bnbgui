@@ -6,7 +6,7 @@ global bnbsystem
 ssh2_conn = ssh2_config(bnbsystem.sshdata.hostName,bnbsystem.sshdata.userName,bnbsystem.sshdata.password);
 
 %% (1) ask for data folder
-[~,folders] = ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && cd data && ls']);
+[~,folders] = ssh2_command(ssh2_conn,['cd ' bnbsystem.code_folder ' && cd ' bnbsystem.code_folder ' && ls']);
 
 [selection,ok] = listdlg('ListString',folders,'SelectionMode','single','Name','Select data folder');
 
@@ -14,7 +14,7 @@ if ~ok
     traces=[];
     return
 end
-datain_folder = ['data/' folders{selection,1}];
+datain_folder = [bnbsystem.bnbdatafolder '/' folders{selection,1}];
 
 dataout_folder = 'data_out'; % folder to put temporary results
 memory = '16'; % required memory for each job (Gb)

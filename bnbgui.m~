@@ -18,7 +18,7 @@ global bnbsystem
 btn_h = 120;
 btn_v = 30;
 
-bnbsystem.bnbdatafolder = '../../../../hpc_norepl/data';
+bnbsystem.bnbdatafolder = ../../../../hpc_norepl/data';
 
 bnbsystem.mainFig = figure('Visible','on','MenuBar','none','Position',[400 250 1000 500],'Name','bnb Main','NumberTitle','off');
 
